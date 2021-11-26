@@ -47,42 +47,57 @@ function getResult(numberOfRightAnswers) {
 }
 
 function CheckWord(answer) {
-  // TODO: Card animation, show answer
+  if (isFinished) {
+    isFinished = false;
 
-  // Input validation
-  if (inputValidation($(".answer--input").val().toLowerCase())) {
-    $(".answer--input").css("border-color", "#000");
-  } else {
-    $(".answer--input").css("border-color", "#ff0000");
-    return;
+    // Input validation
+    if (inputValidation($(".answer--input").val().toLowerCase())) {
+      $(".answer--input").css("border-color", "#000");
+    } else {
+      $(".answer--input").css("border-color", "#ff0000");
+      return;
+    }
+
+    // Check the answer
+    // Card animation, show answer
+    $(".card").toggleClass("flipInY");
+    $("#word").text(word[1]);
+    setTimeout(() => { 
+      $(".card").toggleClass("flipInY");
+
+      if ($(".answer--input").val().toLowerCase() == answer[1]) {
+        $("#right").text(parseInt($("#right").text()) + 1);
+      } else {
+        $("#wrong").text(parseInt($("#wrong").text()) + 1);
+      }
+      $(".answer--input").val(""); // Clear answer
+    
+      // Add 1 to number of done words and delete current word
+      if ($("#numberOfDoneWords").text() != $("#numberOfUndoneWords").text()) {
+        $("#numberOfDoneWords").text(parseInt($("#numberOfDoneWords").text()) + 1);
+      }
+      words.splice(getIndexOfWord(answer), 1);
+    
+      // Check if all words already had been  
+      if (!words.length) {
+        $(".modal").addClass("modal__open");
+        const result = getResult(parseInt($("#right").text()));
+        $("#level").text(result[0]);
+        $("#level-text").text(result[1]);
+        return;
+      }
+    
+      // Generate the next word
+      word = getRandomWord();
+      $("#word").text(word[0]);
+      $(".card").toggleClass("fadeInRight");
+      setTimeout(() => {
+        $(".card").toggleClass("fadeInRight");
+
+        isFinished = true;
+      }, 1000);
+    }, 1200);
   }
-
-  // Check the answer
-  if ($(".answer--input").val().toLowerCase() == answer[1]) {
-    $("#right").text(parseInt($("#right").text()) + 1);
-  } else {
-    $("#wrong").text(parseInt($("#wrong").text()) + 1);
-  }
-  $(".answer--input").val(""); // Clear answer
-
-  // Add 1 to number of done words and delete current word
-  if ($("#numberOfDoneWords").text() != $("#numberOfUndoneWords").text()) {
-    $("#numberOfDoneWords").text(parseInt($("#numberOfDoneWords").text()) + 1);
-  }
-  words.splice(getIndexOfWord(answer), 1);
-
-  // Check if all words already had been  
-  if (!words.length) {
-    $(".modal").addClass("modal__open");
-    const result = getResult(parseInt($("#right").text()));
-    $("#level").text(result[0]);
-    $("#level-text").text(result[1]);
-    return;
-  }
-
-  // Generate the next word
-  word = getRandomWord();
-  $("#word").text(word[0]);
 }
 
 // Call a function CheckWord if enter is clicked
@@ -95,6 +110,7 @@ $(".answer--input").keypress(function(event) {
 });
 
 var word; // Current word
+let isFinished = true; // prevent answer before animation
 const words = [
   ["melon", "диня"],
   ["soap", "мило"],
